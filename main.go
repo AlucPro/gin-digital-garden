@@ -3,6 +3,7 @@ package main
 import (
 	"gin-digital-garden/core"
 	"gin-digital-garden/global"
+	"gin-digital-garden/initialize"
 
 	"go.uber.org/zap"
 
@@ -24,7 +25,7 @@ func main() {
 	global.GLOBAL_LOG.Info("server run success on ", zap.String("zap_log", "zap_log"))
 
 	//  TODO：3.数据库连接
-
+	global.GLOBAL_DB = initialize.Gorm()
 	// TODO：4.其他初始化
 
 	// TODO：5.启动服务

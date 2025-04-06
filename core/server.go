@@ -3,11 +3,12 @@ package core
 import (
 	"fmt"
 	"gin-digital-garden/global"
-	"net/http"
+	"gin-digital-garden/initialize"
 	"time"
 
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type server interface {
@@ -15,21 +16,20 @@ type server interface {
 }
 
 func RunServer() {
-	r := gin.Default()
+	// 初始化路由
+	initialize.Redis()
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.String(http.StatusOK, "pong")
-	})
+	Router := initialize.Routers()
 
-	address := fmt.Sprintf(":%d", global.GLOBAL_CONFIG.App.Port)
-	s := initServer(address, r)
+	address := fmt.Sprintf(":%d", global.GLOBAL_VP.GetInt("app.port"))
+	s := initServer(address, Router)
+
+	global.GLOBAL_LOG.Info("server run success on ", zap.String("address", address))
 
 	// 保证文本顺序输出
 	time.Sleep(10 * time.Microsecond)
 
-	fmt.Println(`address`, address)
-
-	s.ListenAndServe()
+	global.GLOBAL_LOG.Error(s.ListenAndServe().Error())
 }
 
 func initServer(address string, router *gin.Engine) server {
